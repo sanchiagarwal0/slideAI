@@ -1,0 +1,106 @@
+{% import "_workbook.html" as wb %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SlideAI — Sign in</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  {{ wb.tabstrip(1) }}
+
+  <div class="hero-stage">
+
+    <div class="hero-copy">
+      <span class="eyebrow">fx &nbsp;ACCOUNT()</span>
+      <h1>Turn spreadsheets into slide decks</h1>
+      <p class="lede">Upload a CSV or Excel file, pick a look, and SlideAI builds the KPIs, trends and narrative for you — sign in to start.</p>
+    </div>
+
+    <div class="hero-illustration" aria-hidden="true">
+      <div class="hero-grid">
+        {% for i in range(12) %}<div class="hero-grid__cell"></div>{% endfor %}
+        <div class="hero-grid__scanner"></div>
+      </div>
+      <span class="hero-arrow">→</span>
+      <div class="hero-slide">
+        <div class="hero-slide__title">Q3 Revenue</div>
+        <div class="hero-slide__body">
+          <div class="hero-slide__line"></div>
+          <div class="hero-slide__line"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card card--selectable" style="width: 380px; padding: 36px 34px; flex-shrink: 0;">
+      <span class="corner-note">A1</span>
+
+      <div class="mode-toggle">
+        <button type="button" id="signin-tab" class="active" onclick="showForm('signin')">Sign in</button>
+        <button type="button" id="signup-tab" onclick="showForm('signup')">Create account</button>
+      </div>
+
+      <form id="signin-form" class="panel active" action="/login" method="post">
+        <label for="loginid">User ID</label>
+        <input type="text" id="loginid" name="loginid" required autocomplete="username">
+
+        <label for="password">Password</label>
+        <div class="field-password">
+          <input type="password" id="password" name="password" required autocomplete="current-password">
+          <span class="toggle-password" onclick="togglePassword('password')">show</span>
+        </div>
+
+        <button type="submit" class="btn btn--primary">Sign in →</button>
+      </form>
+
+      <form id="signup-form" class="panel" action="/signup" method="post">
+        <label for="newid">Choose a user ID</label>
+        <input type="text" id="newid" name="newid" required autocomplete="username">
+
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" required autocomplete="email">
+
+        <label for="newpassword">Password</label>
+        <div class="field-password">
+          <input type="password" id="newpassword" name="newpassword" required autocomplete="new-password">
+          <span class="toggle-password" onclick="togglePassword('newpassword')">show</span>
+        </div>
+
+        <button type="submit" class="btn btn--primary">Create account →</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    function showForm(form) {
+      document.getElementById('signin-form').classList.remove('active');
+      document.getElementById('signup-form').classList.remove('active');
+      document.getElementById('signin-tab').classList.remove('active');
+      document.getElementById('signup-tab').classList.remove('active');
+
+      if (form === 'signin') {
+        document.getElementById('signin-form').classList.add('active');
+        document.getElementById('signin-tab').classList.add('active');
+      } else {
+        document.getElementById('signup-form').classList.add('active');
+        document.getElementById('signup-tab').classList.add('active');
+      }
+    }
+
+    function togglePassword(fieldId) {
+      const field = document.getElementById(fieldId);
+      const toggle = field.nextElementSibling;
+      if (field.type === "password") {
+        field.type = "text";
+        toggle.textContent = "hide";
+      } else {
+        field.type = "password";
+        toggle.textContent = "show";
+      }
+    }
+  </script>
+</body>
+</html>

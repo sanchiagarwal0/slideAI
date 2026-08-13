@@ -1,0 +1,7 @@
+local_blob_store/
+activity_log.db
+__pycache__/
+*.pyc
+.env
+.env.local
+.vercel

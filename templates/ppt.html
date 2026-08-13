@@ -1,0 +1,162 @@
+{% import "_workbook.html" as wb %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SlideAI — Choose a theme</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .wrap { width: 100%; max-width: 880px; }
+
+    .themes {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+      margin: 26px 0 30px;
+    }
+    @media (max-width: 720px) { .themes { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 480px) { .themes { grid-template-columns: 1fr; } }
+
+    .theme-card {
+      position: relative;
+      border: 1px solid var(--rule);
+      border-radius: var(--radius-lg);
+      background: var(--paper-raised);
+      padding: 12px;
+      cursor: pointer;
+      transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s;
+    }
+    .theme-card:hover { transform: translateY(-2px); box-shadow: 0 10px 22px -14px rgba(32,43,34,0.4); }
+    .theme-card input { position: absolute; top: 12px; right: 12px; margin: 0; cursor: pointer; }
+    .theme-card input:checked ~ .theme-card__label-row .theme-name { color: var(--accent-deep); }
+    .theme-card:has(input:checked),
+    .theme-card.is-selected { border-color: var(--accent-deep); box-shadow: 0 0 0 3px rgba(217,166,46,0.18); }
+
+    /* mini slide preview, rendered with the exact colors apply_theme() uses */
+    .slide-mini {
+      border-radius: 2px;
+      overflow: hidden;
+      border: 1px solid rgba(0,0,0,0.15);
+      margin-bottom: 12px;
+      aspect-ratio: 16 / 9;
+      display: flex;
+      flex-direction: column;
+    }
+    .slide-mini__title {
+      font-family: var(--font-serif);
+      font-size: 12px;
+      padding: 8px 10px 6px;
+    }
+    .slide-mini__body {
+      flex: 1;
+      padding: 0 10px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      justify-content: center;
+    }
+    .slide-mini__line { height: 4px; border-radius: 2px; opacity: 0.8; }
+    .slide-mini__line:nth-child(2) { width: 70%; }
+
+    .theme-card__label-row { display: flex; justify-content: space-between; align-items: baseline; }
+    .theme-name { font-family: var(--font-mono); font-weight: 600; font-size: 13.5px; }
+    .theme-desc { font-family: var(--font-sans); font-size: 12px; color: var(--ink-soft); margin-top: 3px; }
+  </style>
+</head>
+<body>
+
+  {{ wb.tabstrip(3) }}
+
+  <div class="stage">
+    <div class="wrap">
+      <span class="eyebrow">fx &nbsp;THEME()</span>
+      <h1 style="font-size: 24px;">Pick a look for your deck</h1>
+      <p class="lede">Each preview mirrors the actual slide styling — background, title bar and body text — that gets applied to every slide in the export.</p>
+
+      <form action="/generate_ppt" method="POST">
+        <div class="themes">
+
+          <label class="theme-card" style="display:block;">
+            <input type="radio" name="theme" value="classic" required>
+            <div class="slide-mini" style="background: rgb(245,245,220);">
+              <div class="slide-mini__title" style="background: rgb(222,184,135); color: rgb(101,67,33);">Title</div>
+              <div class="slide-mini__body">
+                <div class="slide-mini__line" style="background: rgb(85,85,85);"></div>
+                <div class="slide-mini__line" style="background: rgb(85,85,85);"></div>
+              </div>
+            </div>
+            <div class="theme-card__label-row"><span class="theme-name">Classic</span></div>
+            <div class="theme-desc">Neutral tones, traditional layout.</div>
+          </label>
+
+          <label class="theme-card" style="display:block;">
+            <input type="radio" name="theme" value="modern">
+            <div class="slide-mini" style="background: rgb(102,126,234);">
+              <div class="slide-mini__title" style="background: rgb(138,43,226); color: rgb(255,255,255);">Title</div>
+              <div class="slide-mini__body">
+                <div class="slide-mini__line" style="background: rgb(240,248,255);"></div>
+                <div class="slide-mini__line" style="background: rgb(240,248,255);"></div>
+              </div>
+            </div>
+            <div class="theme-card__label-row"><span class="theme-name">Modern</span></div>
+            <div class="theme-desc">Bold colors, clean lines.</div>
+          </label>
+
+          <label class="theme-card" style="display:block;">
+            <input type="radio" name="theme" value="minimal">
+            <div class="slide-mini" style="background: rgb(224,231,255);">
+              <div class="slide-mini__title" style="background: rgb(135,206,250); color: rgb(25,25,112);">Title</div>
+              <div class="slide-mini__body">
+                <div class="slide-mini__line" style="background: rgb(47,79,79);"></div>
+                <div class="slide-mini__line" style="background: rgb(47,79,79);"></div>
+              </div>
+            </div>
+            <div class="theme-card__label-row"><span class="theme-name">Minimal</span></div>
+            <div class="theme-desc">White space, subtle design.</div>
+          </label>
+
+          <label class="theme-card" style="display:block;">
+            <input type="radio" name="theme" value="corporate">
+            <div class="slide-mini" style="background: rgb(15,23,42);">
+              <div class="slide-mini__title" style="background: rgb(32,178,170); color: rgb(255,255,255);">Title</div>
+              <div class="slide-mini__body">
+                <div class="slide-mini__line" style="background: rgb(176,196,222);"></div>
+                <div class="slide-mini__line" style="background: rgb(176,196,222);"></div>
+              </div>
+            </div>
+            <div class="theme-card__label-row"><span class="theme-name">Corporate</span></div>
+            <div class="theme-desc">Professional, business-friendly style.</div>
+          </label>
+
+          <label class="theme-card" style="display:block;">
+            <input type="radio" name="theme" value="creative">
+            <div class="slide-mini" style="background: rgb(236,72,153);">
+              <div class="slide-mini__title" style="background: rgb(255,20,147); color: rgb(255,255,255);">Title</div>
+              <div class="slide-mini__body">
+                <div class="slide-mini__line" style="background: rgb(255,228,225);"></div>
+                <div class="slide-mini__line" style="background: rgb(255,228,225);"></div>
+              </div>
+            </div>
+            <div class="theme-card__label-row"><span class="theme-name">Creative</span></div>
+            <div class="theme-desc">Playful, dynamic, artistic feel.</div>
+          </label>
+
+        </div>
+
+        <button type="submit" class="btn btn--primary" style="width: auto; padding: 13px 28px;">Generate deck →</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    document.querySelectorAll('.theme-card input[type="radio"]').forEach(function (input) {
+      input.addEventListener('change', function () {
+        document.querySelectorAll('.theme-card').forEach(function (c) { c.classList.remove('is-selected'); });
+        input.closest('.theme-card').classList.add('is-selected');
+      });
+    });
+  </script>
+</body>
+</html>

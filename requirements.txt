@@ -1,0 +1,9 @@
+Flask>=3.0
+pandas>=2.0
+python-pptx>=1.0
+matplotlib>=3.8
+numpy>=1.26
+openpyxl>=3.1
+requests>=2.31
+vercel_blob>=0.4.0
+psycopg2-binary>=2.9

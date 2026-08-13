@@ -1,0 +1,215 @@
+{% import "_workbook.html" as wb %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SlideAI — Your report</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .report {
+      max-width: 880px;
+      margin: 0 auto;
+      padding: 48px 20px 100px;
+    }
+    .report__head {
+      text-align: center;
+      margin-bottom: 42px;
+    }
+    .report__head h1 { font-size: 34px; }
+    .report__meta {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      margin-top: 12px;
+    }
+
+    .report__section { margin-bottom: 44px; }
+    .report__section h2 {
+      font-size: 13px;
+      font-family: var(--font-mono);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--ink-soft);
+      border-bottom: 1px solid var(--rule);
+      padding-bottom: 10px;
+      margin-bottom: 18px;
+    }
+
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 14px;
+    }
+    .stat-card {
+      background: var(--paper-raised);
+      border: 1px solid var(--rule);
+      border-radius: var(--radius-lg);
+      padding: 16px 18px;
+    }
+    .stat-card__name {
+      font-family: var(--font-serif);
+      font-size: 16px;
+      margin-bottom: 10px;
+    }
+    .stat-card__row {
+      display: flex;
+      justify-content: space-between;
+      font-family: var(--font-mono);
+      font-size: 12.5px;
+      color: var(--ink-soft);
+      padding: 3px 0;
+      border-top: 1px dashed var(--rule);
+    }
+    .stat-card__row:first-of-type { border-top: none; }
+    .stat-card__row b { color: var(--ink); font-weight: 500; }
+
+    .insight-card {
+      background: var(--paper-raised);
+      border-left: 3px solid var(--accent);
+      border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
+      padding: 16px 20px;
+      margin-bottom: 14px;
+      white-space: pre-wrap;
+      font-family: var(--font-sans);
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--ink-soft);
+    }
+    .insight-card b, .insight-card strong { color: var(--ink); }
+
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 16px;
+    }
+    .gallery figure {
+      margin: 0;
+      background: var(--paper-raised);
+      border: 1px solid var(--rule);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+    .gallery img { display: block; width: 100%; }
+    .gallery figcaption {
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+      color: var(--ink-soft);
+      padding: 8px 12px;
+      border-top: 1px solid var(--rule);
+    }
+    .gallery figcaption b { color: var(--ink); font-weight: 600; }
+
+    .empty {
+      font-family: var(--font-mono);
+      font-size: 12.5px;
+      color: var(--ink-faint);
+    }
+
+    .report__end {
+      text-align: center;
+      margin-top: 56px;
+      padding-top: 22px;
+      border-top: 1px solid var(--rule);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--ink-faint);
+    }
+
+    .download-bar {
+      position: sticky;
+      bottom: 0;
+      display: flex;
+      justify-content: center;
+      padding: 18px;
+      background: linear-gradient(0deg, var(--paper) 60%, transparent);
+    }
+    .download-bar .btn { width: auto; padding: 14px 30px; }
+  </style>
+</head>
+<body>
+
+  {{ wb.tabstrip(4) }}
+
+  <div class="report">
+    <div class="report__head">
+      <span class="eyebrow">fx &nbsp;RENDER(complete)</span>
+      <h1>Your report is ready</h1>
+      <p class="lede" style="margin: 0;">Generated from {{ data.source_file if data else 'your upload' }}, {{ data.rows if data else '' }} rows across {{ data.columns|length if data and data.columns else '' }} columns.</p>
+      <div class="report__meta">
+        <span class="chip">theme: {{ theme }}</span>
+        {% if data %}<span class="chip">{{ data.rows }} rows</span>{% endif %}
+      </div>
+    </div>
+
+    <div class="report__section">
+      <h2>Key metrics</h2>
+      {% if data and data.kpis %}
+        <div class="stat-grid">
+          {% for col, metrics in data.kpis.items() %}
+            <div class="stat-card">
+              <div class="stat-card__name">{{ col }}</div>
+              {% for k, v in metrics.items() %}
+                <div class="stat-card__row"><span>{{ k }}</span><b>{{ "%.2f"|format(v) }}</b></div>
+              {% endfor %}
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="empty">No KPIs available</p>
+      {% endif %}
+    </div>
+
+    <div class="report__section">
+      <h2>Insights</h2>
+      {% if data and data.insights %}
+        {% for col, text in data.insights.items() %}
+          <div class="insight-card"><b>{{ col }}</b><br>{{ text }}</div>
+        {% endfor %}
+      {% else %}
+        <p class="empty">No insights available</p>
+      {% endif %}
+    </div>
+
+    <div class="report__section">
+      <h2>Charts</h2>
+      {% if data and data.charts %}
+        <div class="gallery">
+          {% for col, chart_url in data.charts.items() %}
+            <figure>
+              <img src="{{ chart_url }}" alt="{{ col }} chart">
+              <figcaption><b>Fig. {{ loop.index }}</b> — {{ col }}</figcaption>
+            </figure>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="empty">No charts available</p>
+      {% endif %}
+    </div>
+
+    {% if data and data.correlation %}
+    <div class="report__section">
+      <h2>Correlation</h2>
+      <div class="gallery">
+        <figure>
+          <img src="{{ data.correlation }}" alt="Correlation heatmap">
+          <figcaption>correlation heatmap</figcaption>
+        </figure>
+      </div>
+    </div>
+    {% endif %}
+
+    <div class="report__end">— end of report —</div>
+  </div>
+
+  <div class="download-bar">
+    <a href="{{ ppt_url }}" download="{{ ppt_filename }}" class="btn btn--primary">
+      Download PPT ↓
+    </a>
+  </div>
+
+</body>
+</html>

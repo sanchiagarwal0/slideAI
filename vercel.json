@@ -8,7 +8,12 @@
   ],
   "routes": [
     {
-      "handle": "filesystem"
+      "src": "/css/(.*)",
+      "dest": "/api/index.py"
+    },
+    {
+      "src": "/favicon.svg",
+      "dest": "/api/index.py"
     },
     {
       "src": "/(.*)",

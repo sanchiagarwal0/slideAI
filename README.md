@@ -1,70 +1,150 @@
-# SlideAI (Vercel-ready)
+# SlideAI
 
-Upload a CSV or Excel file, pick a theme, and SlideAI analyzes your data — KPIs, trends,
-outliers, correlations — into a polished PowerPoint deck. Same Flask app and vanilla
-HTML/CSS/JS frontend as before, rearchitected so it actually works once deployed to Vercel's
-serverless functions, not just locally.
+Turn a spreadsheet into a polished PowerPoint presentation — automatically.
 
-## Why the previous version wouldn't have worked on Vercel
+**🔗 Live demo:** https://slideai-lilac.vercel.app/
 
-The original Flask app saved uploads to local disk, wrote generated `.pptx`/chart files to
-`static/reports/` and `static/charts/`, and logged activity to a local SQLite file — then read
-several of those back in a *later* request. Vercel Functions don't share a persistent
-filesystem between invocations, so that flow would deploy successfully and then break the
-first time someone actually generated a deck. This version fixes that:
+---
 
-| Problem | Fix |
-|---|---|
-| Upload saved to local disk, reloaded in a later request | Parsed entirely in-memory in the same request (`backend.py: load_file_from_upload`) |
-| Chart PNGs + generated `.pptx` written to local disk | Generated in-memory, uploaded to **Vercel Blob**, referenced by URL (`storage.py`) |
-| `activity_log.db` (local SQLite) | Logged to **Postgres** via `DATABASE_URL` when set (`db.py`) |
-| Static assets served via Flask's `static_folder` | Moved to `public/`, per [Vercel's Flask guidance](https://vercel.com/docs/frameworks/backend/flask) — served from Vercel's CDN, never hits the Python function |
-| Session held the full analysis (KPIs, insight text, chart paths) | Session now holds only a **URL** to one JSON blob containing all of that — keeps the cookie tiny regardless of dataset size |
+## Table of Contents
 
-**Local development still works with zero cloud setup** — `storage.py` and `db.py` fall back to
-a local folder (`local_blob_store/`) and local SQLite when `BLOB_READ_WRITE_TOKEN` /
-`DATABASE_URL` aren't set, so `python app.py` behaves the same as before.
+- [What is SlideAI?](#what-is-slideai)
+- [How It Works](#how-it-works)
+- [Features](#features)
+- [Try the Live Demo](#try-the-live-demo)
+- [Running It Locally](#running-it-locally)
+- [Project Structure](#project-structure)
+- [Tech Stack](#tech-stack)
+- [Deploying Your Own Copy](#deploying-your-own-copy)
+- [Limitations](#limitations)
+- [FAQ](#faq)
 
-## Deploying to Vercel
+---
 
-1. **Push this to a Git repo** and import it in Vercel (or `vercel deploy` from the CLI).
-   Vercel auto-detects the Flask entrypoint (`app.py`) — no build config needed for that part.
+## What is SlideAI?
 
-2. **Create a Blob store**: Project → Storage → Create Database → **Blob** → connect it to this
-   project. This sets `BLOB_READ_WRITE_TOKEN` automatically.
+SlideAI is a web app that takes a plain data file (like a CSV or Excel spreadsheet) and turns
+it into a ready-to-use PowerPoint presentation — complete with charts, key numbers, and written
+insights about your data.
 
-3. **Create a Postgres database** (optional, only needed for the admin activity log): Project →
-   Storage → Create Database → **Postgres** (Neon-backed). This sets `DATABASE_URL`
-   automatically. Skip this and the app still works fine — activity logging just no-ops.
+Instead of spending hours building slides by hand, you upload your file, pick a look you like,
+and SlideAI does the analysis and slide-building for you.
 
-4. **Set `SECRET_KEY`**: Project → Settings → Environment Variables → add a long random string.
+## How It Works
 
-5. Redeploy after adding the integrations so the new environment variables take effect.
+1. **Upload** — Drop in a `.csv` or `.xlsx` file.
+2. **Choose a theme** — Pick the visual style you want your deck to have.
+3. **Automatic analysis** — SlideAI scans your data for:
+   - Key numbers (KPIs)
+   - Trends over time
+   - Unusual values (outliers)
+   - Relationships between columns (correlations)
+4. **Get your deck** — Download a finished `.pptx` file with charts and explanations already
+   built in.
 
-## Known platform limits to plan around
+## Features
 
-- **4MB upload cap.** Vercel Functions cap request bodies at 4.5MB; `app.py` enforces a 4MB
-  limit itself so oversized uploads fail with a clean message instead of a raw platform error.
-  If you need larger files, that means moving to Vercel Blob's client-side upload flow (browser
-  uploads directly to Blob, bypassing the function) — a real change, not a config tweak.
-- **`vercel_blob` is an unofficial, community-maintained PyPI package** — there's no official
-  Vercel Python SDK for Blob at the time of writing. It's a thin wrapper around the same REST
-  API the official JS SDK uses. Worth a quick smoke test after your first deploy (upload a file,
-  confirm it shows up in the Blob store dashboard) since I couldn't test it against real Vercel
-  credentials from where this was built.
-- **In-memory user store.** Signups (`/signup`) still only live in the running function
-  instance's memory, same as the original app — fine for the demo logins (`admin/12345`,
-  `user1/pass1`, `user2/pass2`), not for real accounts. Move to a Postgres users table with
-  hashed passwords before treating this as a real login system.
-- **Cold starts.** pandas + matplotlib + python-pptx is a moderately heavy dependency stack;
-  expect a slower first request after idle periods.
+- 📊 Works with CSV and Excel files
+- 🎨 Multiple slide themes to choose from
+- 🤖 Automatic data analysis — no formulas or charting needed on your end
+- 📥 Download a real, editable PowerPoint file
+- 🔐 Simple login system (demo accounts included)
+- 🖥️ Admin view to see activity/usage
 
-## Local development
+## Try the Live Demo
+
+Go to **https://slideai-lilac.vercel.app/** and log in with any of these demo accounts:
+
+| Username | Password |
+|----------|----------|
+| `admin`  | `12345`  |
+| `user1`  | `pass1`  |
+| `user2`  | `pass2`  |
+
+Then upload a spreadsheet and follow the on-screen steps.
+
+> Note: this is a demo — please don't upload real personal or sensitive data.
+
+## Running It Locally
+
+Want to run SlideAI on your own computer instead of using the live version?
+
+**Requirements:** Python installed on your machine.
 
 ```bash
+# 1. Install the required packages
 pip install -r requirements.txt
-cp .env.example .env   # optional locally — everything falls back gracefully without it
+
+# 2. (Optional) copy the example settings file
+cp .env.example .env
+
+# 3. Start the app
 python app.py
 ```
 
-Open `http://127.0.0.1:5000`. Demo login: `admin/12345`.
+Now open your browser to:
+
+```
+http://127.0.0.1:5000
+```
+
+Log in with `admin / 12345` and try it out.
+
+## Project Structure
+
+A quick tour of the important files:
+
+```
+slideai/
+├── app.py              # Main application — routes/pages
+├── backend.py           # Reads and analyzes your uploaded file
+├── storage.py           # Handles saving files/charts
+├── db.py                # Handles activity logging
+├── templates/            # The web pages (HTML)
+├── public/               # Images, styles, static files
+└── requirements.txt       # List of Python packages needed
+```
+
+## Tech Stack
+
+- **Backend:** Python (Flask)
+- **Data analysis:** pandas
+- **Charts:** matplotlib
+- **Slide generation:** python-pptx
+- **Frontend:** Plain HTML, CSS, and JavaScript
+- **Hosting:** Vercel
+
+## Deploying Your Own Copy
+
+If you'd like to host your own version on Vercel:
+
+1. Push this project to a GitHub repository.
+2. Import it into [Vercel](https://vercel.com) — it auto-detects the app, no extra config needed.
+3. In your Vercel project, go to **Storage → Create Database → Blob** (used to store
+   generated files).
+4. *(Optional)* Also create a **Postgres** database if you want activity logging.
+5. Go to **Settings → Environment Variables** and add a `SECRET_KEY` (any long random text).
+6. Redeploy — you're live!
+
+## Limitations
+
+- 📁 Uploaded files must be **under 4MB**.
+- 👤 Signups made through the app aren't permanently saved — this is a demo login system, not a
+  real user database.
+- ⏳ The very first request after the app has been idle for a while may load a bit slowly — this
+  is normal and just how this type of free hosting works.
+
+## FAQ
+
+**Do I need to install anything to try it?**
+No — just visit the live demo link and log in with a demo account.
+
+**What file types can I upload?**
+CSV (`.csv`) or Excel (`.xlsx`) files.
+
+**Can I edit the PowerPoint after it's generated?**
+Yes! It downloads as a normal `.pptx` file you can open and edit in PowerPoint, Google Slides,
+Keynote, etc.
+
+**Is my data safe?**
+This is a demo project, so avoid uploading anything private or sensitive.

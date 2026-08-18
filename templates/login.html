@@ -44,6 +44,9 @@
       </div>
 
       <form id="signin-form" class="panel active" action="/login" method="post">
+        {% if error %}
+          <div class="login-error" role="alert">{{ error }}</div>
+        {% endif %}
         <label for="loginid">User ID</label>
         <input type="text" id="loginid" name="loginid" required autocomplete="username">
 

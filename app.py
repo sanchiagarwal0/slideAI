@@ -63,8 +63,10 @@ def login():
             return redirect(url_for("admin"))
         return redirect(url_for("upload"))
 
-    return "Invalid Login ID or Password!"
-
+    return render_template(
+        "login.html",
+        error="Invalid Login ID or Password!"
+    ), 401
 
 @app.route("/logout")
 def logout():
@@ -78,7 +80,7 @@ def signup():
     newpassword = request.form.get("newpassword")
 
     if newid in users:
-        return "User already exists!"
+        return render_template("login.html", error="User already exists!")
 
     # NOTE: in-memory only, same as the original app — a fresh serverless
     # instance won't remember signups made on a different instance. Swap

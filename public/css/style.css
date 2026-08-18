@@ -473,4 +473,13 @@ form.panel.active { display: block; }
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; transition: none !important; }
   .hero-grid__scanner { opacity: 0; }
+
+  .login-error {
+  margin-bottom: 16px;
+  padding: 10px 12px;
+  border: 1px solid currentColor;
+  border-radius: 8px;
+  font-size: 14px;
 }
+}
+

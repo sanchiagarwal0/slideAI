@@ -94,6 +94,18 @@ a { color: var(--pine); }
   align-items: stretch;
 }
 
+.workbook__logout {
+  margin-left: auto;
+  padding: 8px 0 8px 18px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--ink-soft);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.workbook__logout:hover { color: var(--coral); }
+
 .tab {
   display: flex;
   align-items: center;

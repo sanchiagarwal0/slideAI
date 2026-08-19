@@ -24,5 +24,8 @@ SlideAI
       </div>
     {% endfor %}
   </div>
+  {% if session.get('loggedin') %}
+    <a href="{{ url_for('logout') }}" class="workbook__logout">Log out</a>
+  {% endif %}
 </nav>
 {%- endmacro %}
